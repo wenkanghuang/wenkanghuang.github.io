@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "statDefinitions": ["项目数量（待定）", "统计口径（待定）", "统计口径（待定）"],
+  "projects": [],
+  "fieldTemplate": {
+    "id": "project-000",
+    "title": "",
+    "year": null,
+    "category": "",
+    "role": "",
+    "coverImage": "",
+    "coverAlt": "",
+    "summary": "",
+    "detailImages": [],
+    "links": []
+  }
+}

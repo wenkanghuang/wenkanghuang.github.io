@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "papers": [],
+  "projects": [],
+  "fieldTemplate": {
+    "paper": {
+      "id": "paper-000",
+      "title": "",
+      "journal": "",
+      "year": null,
+      "status": "published | accepted | under-review",
+      "authorRole": "first | co-first | corresponding | co-author",
+      "authorRoleLabel": "",
+      "authors": "",
+      "rankings": { "jcr": "", "cas": "", "emerging": "" },
+      "coverImage": "",
+      "coverAlt": "",
+      "detailImage": "",
+      "contribution": "",
+      "doi": "",
+      "materials": [],
+      "materialsLabel": ""
+    },
+    "project": {
+      "id": "research-project-000",
+      "title": "",
+      "role": "",
+      "period": "",
+      "summary": ""
+    }
+  }
+}

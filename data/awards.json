@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "awards": [],
+  "fieldTemplate": {
+    "id": "award-000",
+    "title": "",
+    "year": null,
+    "level": "national | provincial | other",
+    "organization": "",
+    "certificateImage": "",
+    "certificateAlt": "",
+    "summary": "",
+    "public": false
+  }
+}

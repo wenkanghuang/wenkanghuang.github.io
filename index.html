@@ -1,45 +1,90 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>个人学术主页测试</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 40px 20px;
-      color: #333;
-    }
-
-    .card {
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 40px 25px;
-      background: white;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 26px;
-    }
-
-    p {
-      line-height: 2;
-      color: #666;
-    }
-  </style>
+  <meta name="description" content="个人学术成果、设计实践与荣誉展示主页。">
+  <title>个人学术主页｜Academic Portfolio</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
-
 <body>
-  <div class="card">
-    <h1>个人学术主页</h1>
-    <p>我的个人学术主页，持续更新中。</p>
-    <p>欢迎访问我的个人学术主页。</p>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="#research" aria-label="返回科研成果首页">
+      <span class="wordmark-mark">WH</span>
+      <span>Academic Portfolio</span>
+    </a>
+    <nav class="primary-nav" aria-label="主要页面">
+      <button class="nav-link is-active" type="button" data-page="research" aria-current="page">科研成果 <span>Research</span></button>
+      <button class="nav-link" type="button" data-page="design">设计实践 <span>Design</span></button>
+      <button class="nav-link" type="button" data-page="awards">荣誉与其他 <span>Awards &amp; More</span></button>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="profile-shell" aria-labelledby="profile-name">
+      <div class="profile-photo" id="profile-photo" aria-hidden="true"><span>PHOTO</span></div>
+      <div class="profile-intro">
+        <p class="eyebrow">Academic profile · 学术主页</p>
+        <h1 id="profile-name">个人信息待补充</h1>
+        <p class="profile-role" id="profile-role">学校 / 专业 / 学历</p>
+        <p class="profile-bio" id="profile-bio">我的个人学术主页，持续更新中。欢迎访问我的个人学术主页。</p>
+      </div>
+      <dl class="profile-meta" id="profile-meta" aria-label="个人资料"></dl>
+      <div class="profile-actions" id="profile-actions"></div>
+    </section>
+
+    <section class="page is-active" id="research" data-page-panel="research" aria-labelledby="research-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">01 / Selected scholarship</p><h2 id="research-title">科研成果</h2></div>
+        <p>论文、研究课题与个人贡献的结构化档案。统计将在录入真实条目后自动生成。</p>
+      </div>
+      <div class="stats-grid" id="research-stats" aria-label="科研成果统计"></div>
+      <div class="toolbar">
+        <div>
+          <p class="toolbar-label">期刊分区显示</p>
+          <div class="segmented-control" id="ranking-switch" role="group" aria-label="选择期刊分区体系">
+            <button type="button" class="is-active" data-ranking="jcr" aria-pressed="true">JCR</button>
+            <button type="button" data-ranking="cas" aria-pressed="false">中科院</button>
+            <button type="button" data-ranking="emerging" aria-pressed="false">新锐学术</button>
+          </div>
+        </div>
+        <p class="result-count" id="research-count">0 项成果</p>
+      </div>
+      <div class="masonry-grid" id="research-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="page" id="design" data-page-panel="design" aria-labelledby="design-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">02 / Design practice</p><h2 id="design-title">设计实践</h2></div>
+        <p>用于展示经过确认的设计项目、角色、过程和成果。当前仅建立内容结构。</p>
+      </div>
+      <div class="stats-grid" id="design-stats" aria-label="设计实践统计"></div>
+      <div class="masonry-grid" id="design-grid"></div>
+    </section>
+
+    <section class="page" id="awards" data-page-panel="awards" aria-labelledby="awards-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">03 / Recognition &amp; more</p><h2 id="awards-title">个人荣誉与其他</h2></div>
+        <p>国家级、省级与其他荣誉将依据真实数据自动统计。当前仅建立内容结构。</p>
+      </div>
+      <div class="stats-grid" id="awards-stats" aria-label="荣誉统计"></div>
+      <div class="masonry-grid" id="awards-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>个人学术主页 · 内容持续更新中</p>
     <p>电脑端与手机端均可正常显示。</p>
-  </div>
+  </footer>
+
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <aside class="detail-drawer" id="detail-drawer" aria-labelledby="detail-title" aria-hidden="true">
+    <button class="drawer-close" id="drawer-close" type="button" aria-label="关闭详情">×</button>
+    <div id="detail-content"></div>
+  </aside>
+  <div class="status-toast" id="status-toast" role="status" hidden></div>
 </body>
 </html>

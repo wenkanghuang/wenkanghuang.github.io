@@ -13,6 +13,7 @@
 
 - `papers`：论文数组；`status` 和 `authorRole` 用于自动统计，作者名单使用字符串数组。
 - `rankings`：同一论文的 JCR、中科院、新锐学术分区。
+- `detailImages`：详情页科研图片数组，每项包含 `src` 与可访问性说明 `alt`。
 - `projects`：科研课题数组，用于参与课题统计。
 - `articleUrl`、`pdfUrl`：出版社原文与站内/公开 PDF 入口；没有 PDF 时保持空字符串。
 

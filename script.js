@@ -7,6 +7,7 @@ const DATA_PATHS = {
 
 const state = { profile: null, research: null, design: null, awards: null, ranking: "jcr", activePage: "research", lastFocus: null };
 const RANKING_ORDER = ["jcr", "cas", "emerging"];
+let drawerCloseTimer;
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const valueOr = (value, fallback = "待补充") => value && String(value).trim() ? value : fallback;
@@ -46,12 +47,6 @@ function renderProfile(profile) {
     ? `<img src="${escapeHtml(profile.photo)}" alt="${escapeHtml(profile.name || "个人照片")}">`
     : "<span>PHOTO</span>";
   photo.setAttribute("aria-hidden", profile.photo ? "false" : "true");
-
-  const fields = [
-    ["学校", profile.institution], ["专业", profile.major], ["学历", profile.degree],
-    ["研究方向", Array.isArray(profile.researchInterests) ? profile.researchInterests.join("、") : profile.researchInterests]
-  ];
-  $("#profile-meta").innerHTML = fields.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(valueOr(value))}</dd></div>`).join("");
 
   const actions = [];
   if (profile.resumePdf) actions.push(`<a class="action-link" href="${escapeHtml(profile.resumePdf)}" target="_blank" rel="noopener">PDF 简历 ↗</a>`);
@@ -118,14 +113,16 @@ function renderEmpty(container, title, text) {
 function openPaper(id) {
   const paper = (state.research.papers || []).find(item => item.id === id);
   if (!paper) return;
+  clearTimeout(drawerCloseTimer);
   state.lastFocus = document.activeElement;
-  const ranks = paper.rankings || {};
-  $("#detail-content").innerHTML = `${paper.detailImage || paper.coverImage ? `<img class="detail-image" src="${escapeHtml(paper.detailImage || paper.coverImage)}" alt="${escapeHtml(paper.coverAlt || paper.title)}">` : ""}
-    <p class="eyebrow">${escapeHtml(valueOr(paper.journal))}</p><h2 id="detail-title">${escapeHtml(valueOr(paper.title))}</h2>
-    <div class="detail-list">${detailRow("成果类型", paper.type)}${detailRow("发表日期", paper.publicationDate)}
-      ${authorsRow(paper.authors)}${detailRow("作者排序", paper.authorPosition)}${detailRow("作者身份", paper.authorRoleLabel)}
-      ${detailRow("JCR 分区", ranks.jcr)}${detailRow("中科院分区", ranks.cas)}${detailRow("新锐学术", ranks.emerging)}
-      ${detailRow("个人贡献", paper.contributionDetail || paper.contribution)}${detailRow("英文贡献", paper.contributionEn)}${detailRow("ISSN", paper.issn)}
+  const gallery = [
+    ...(paper.detailImage || paper.coverImage ? [{ src: paper.detailImage || paper.coverImage, alt: paper.coverAlt || paper.title }] : []),
+    ...(paper.detailImages || [])
+  ];
+  $("#detail-content").innerHTML = `<p class="eyebrow">${escapeHtml(valueOr(paper.journal))}</p><h2 id="detail-title">${escapeHtml(valueOr(paper.title))}</h2>
+    <div class="detail-gallery">${gallery.map(image => `<img class="detail-image" src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt || paper.title)}">`).join("")}</div>
+    <div class="detail-list">${detailRow("发表日期", paper.publicationDate)}
+      ${detailRow("个人贡献", paper.contributionDetail || paper.contribution)}${detailRow("ISSN", paper.issn)}
       ${detailLinkRow("DOI", paper.doi, paper.articleUrl)}${detailLinkRow("论文原文", "访问出版社开放获取页面 ↗", paper.articleUrl)}
       ${paper.pdfUrl ? detailLinkRow("PDF", "预览或下载 PDF ↗", paper.pdfUrl) : detailRow("PDF", "暂未上传；可通过出版社原文入口访问")}</div>`;
   $("#drawer-backdrop").hidden = false;
@@ -137,13 +134,6 @@ function openPaper(id) {
 
 function detailRow(label, value) {
   return `<div class="detail-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(valueOr(value))}</span></div>`;
-}
-
-function authorsRow(authors = []) {
-  const content = authors.map(author => author === "Wenkang Huang"
-    ? `<strong class="author-self">${escapeHtml(author)}</strong>`
-    : escapeHtml(author)).join(" · ");
-  return `<div class="detail-row"><span>完整作者</span><span>${content || "待补充"}</span></div>`;
 }
 
 function detailLinkRow(label, text, url) {
@@ -167,10 +157,15 @@ function cycleRanking() {
 }
 
 function closeDrawer() {
+  if ($("#detail-drawer").getAttribute("aria-hidden") === "true") return;
   $("#detail-drawer").classList.remove("is-open");
   $("#detail-drawer").setAttribute("aria-hidden", "true");
-  $("#drawer-backdrop").hidden = true;
   document.body.classList.remove("drawer-open");
+  const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 320;
+  clearTimeout(drawerCloseTimer);
+  drawerCloseTimer = setTimeout(() => {
+    if (!$("#detail-drawer").classList.contains("is-open")) $("#drawer-backdrop").hidden = true;
+  }, delay);
   state.lastFocus?.focus();
 }
 

@@ -11,9 +11,10 @@
 
 ## research.json
 
-- `papers`：论文数组；`status` 和 `authorRole` 用于自动统计。
+- `papers`：论文数组；`status` 和 `authorRole` 用于自动统计，作者名单使用字符串数组。
 - `rankings`：同一论文的 JCR、中科院、新锐学术分区。
 - `projects`：科研课题数组，用于参与课题统计。
+- `articleUrl`、`pdfUrl`：出版社原文与站内/公开 PDF 入口；没有 PDF 时保持空字符串。
 
 ## design.json
 

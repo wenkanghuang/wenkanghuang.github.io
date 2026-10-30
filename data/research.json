@@ -1,6 +1,43 @@
 {
   "schemaVersion": 1,
-  "papers": [],
+  "papers": [
+    {
+      "id": "PAPER-001",
+      "type": "Journal Article",
+      "title": "Morphometric typology of Ming Chinese export and domestic porcelain bowls in trade and production contexts",
+      "journal": "npj Heritage Science",
+      "publicationDate": "2026-10-15",
+      "year": 2026,
+      "status": "published",
+      "authorRole": "second",
+      "authorRoleLabel": "SECOND AUTHOR",
+      "authorPosition": "第二作者",
+      "authors": [
+        "Shengying Feng",
+        "Wenkang Huang",
+        "Miao Zhao",
+        "Yingying Wang",
+        "Jinghui Ao",
+        "Gangwei Cai",
+        "Wenwen Shi"
+      ],
+      "rankings": {
+        "jcr": "JCR Q1",
+        "cas": "中科院二区",
+        "emerging": "新锐二区"
+      },
+      "coverImage": "assets/papers/paper-001-cover.webp",
+      "coverAlt": "明代中国外销与内销瓷碗形态测量类型学研究图",
+      "detailImage": "assets/papers/paper-001-cover.webp",
+      "contribution": "论文撰写与返修回复工作",
+      "contributionEn": "Manuscript Writing and Responses to Reviewers",
+      "contributionDetail": "本人主要负责论文撰写及审稿意见回复工作。",
+      "doi": "10.1038/s40494-026-02994-7",
+      "articleUrl": "https://doi.org/10.1038/s40494-026-02994-7",
+      "issn": "3059-3220",
+      "pdfUrl": ""
+    }
+  ],
   "projects": [],
   "fieldTemplate": {
     "paper": {
@@ -11,15 +48,19 @@
       "status": "published | accepted | under-review",
       "authorRole": "first | co-first | corresponding | co-author",
       "authorRoleLabel": "",
-      "authors": "",
+      "authors": [],
+      "authorPosition": "",
       "rankings": { "jcr": "", "cas": "", "emerging": "" },
       "coverImage": "",
       "coverAlt": "",
       "detailImage": "",
       "contribution": "",
+      "contributionEn": "",
+      "contributionDetail": "",
       "doi": "",
-      "materials": [],
-      "materialsLabel": ""
+      "articleUrl": "",
+      "issn": "",
+      "pdfUrl": ""
     },
     "project": {
       "id": "research-project-000",

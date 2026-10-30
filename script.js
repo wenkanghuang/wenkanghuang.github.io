@@ -6,6 +6,7 @@ const DATA_PATHS = {
 };
 
 const state = { profile: null, research: null, design: null, awards: null, ranking: "jcr", activePage: "research", lastFocus: null };
+const RANKING_ORDER = ["jcr", "cas", "emerging"];
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const valueOr = (value, fallback = "待补充") => value && String(value).trim() ? value : fallback;
@@ -37,7 +38,9 @@ function renderProfile(profile) {
   $("#profile-name").textContent = valueOr(profile.name, "个人信息待补充");
   const role = [profile.institution, profile.major, profile.degree].filter(Boolean).join(" · ");
   $("#profile-role").textContent = valueOr(role, "学校 / 专业 / 学历");
-  $("#profile-bio").textContent = valueOr(profile.bio, "我的个人学术主页，持续更新中。欢迎访问我的个人学术主页。");
+  const bio = $("#profile-bio");
+  bio.textContent = profile.bio || "";
+  bio.hidden = !profile.bio;
   const photo = $("#profile-photo");
   photo.innerHTML = profile.photo
     ? `<img src="${escapeHtml(profile.photo)}" alt="${escapeHtml(profile.name || "个人照片")}">`
@@ -53,7 +56,7 @@ function renderProfile(profile) {
   const actions = [];
   if (profile.resumePdf) actions.push(`<a class="action-link" href="${escapeHtml(profile.resumePdf)}" target="_blank" rel="noopener">PDF 简历 ↗</a>`);
   (profile.contacts || []).forEach(contact => {
-    if (contact.url) actions.push(`<a class="action-link" href="${escapeHtml(contact.url)}" target="_blank" rel="noopener">${escapeHtml(contact.label)} ↗</a>`);
+    if (contact.url) actions.push(`<a class="action-link" href="${escapeHtml(contact.url)}">${escapeHtml(contact.label)}</a>`);
   });
   $("#profile-actions").innerHTML = actions.length ? actions.join("") : '<span class="action-link" aria-disabled="true">联系方式待补充</span>';
 }
@@ -71,17 +74,20 @@ function renderResearch() {
   const grid = $("#research-grid");
   if (!papers.length) return renderEmpty(grid, "科研成果占位区", "尚未录入真实论文。后续将从 research.json 自动生成错落卡片、统计与详情。");
   grid.innerHTML = papers.map(renderPaperCard).join("");
-  $$(".work-card", grid).forEach(card => card.addEventListener("click", () => openPaper(card.dataset.id)));
+  $$(".card-open", grid).forEach(card => card.addEventListener("click", () => openPaper(card.dataset.id)));
+  $$(".card-ranking", grid).forEach(button => button.addEventListener("click", cycleRanking));
 }
 
 function renderPaperCard(paper) {
   const ranking = paper.rankings?.[state.ranking] || "待补充";
   const media = paper.coverImage ? `<img src="${escapeHtml(paper.coverImage)}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy">` : "";
-  return `<button class="work-card" type="button" data-id="${escapeHtml(paper.id)}" aria-label="查看论文：${escapeHtml(paper.title)}">
-    <span class="card-media">${media}<span class="card-overlay">${escapeHtml(valueOr(paper.authorRoleLabel))}</span></span>
-    <span class="card-body"><span class="card-kicker"><span>${escapeHtml(valueOr(paper.journal))}</span><span>${escapeHtml(ranking)}</span></span>
-    <h3>${escapeHtml(valueOr(paper.title))}</h3><p>${escapeHtml(valueOr(paper.contribution, "个人贡献待补充"))}</p></span>
-  </button>`;
+  return `<article class="work-card" data-id="${escapeHtml(paper.id)}">
+    <div class="card-kicker"><span>${escapeHtml(valueOr(paper.journal))}</span><button class="card-ranking" type="button" aria-label="切换期刊分区，当前为 ${escapeHtml(ranking)}">${escapeHtml(ranking)}</button></div>
+    <button class="card-open" type="button" data-id="${escapeHtml(paper.id)}" aria-label="查看论文：${escapeHtml(paper.title)}">
+      <span class="card-media">${media}<span class="card-overlay">${escapeHtml(valueOr(paper.authorRoleLabel))}</span></span>
+      <span class="card-body"><h3>${escapeHtml(valueOr(paper.title))}</h3><p><strong>个人贡献：</strong>${escapeHtml(valueOr(paper.contribution, "待补充"))}</p></span>
+    </button>
+  </article>`;
 }
 
 function renderDesign() {
@@ -116,9 +122,12 @@ function openPaper(id) {
   const ranks = paper.rankings || {};
   $("#detail-content").innerHTML = `${paper.detailImage || paper.coverImage ? `<img class="detail-image" src="${escapeHtml(paper.detailImage || paper.coverImage)}" alt="${escapeHtml(paper.coverAlt || paper.title)}">` : ""}
     <p class="eyebrow">${escapeHtml(valueOr(paper.journal))}</p><h2 id="detail-title">${escapeHtml(valueOr(paper.title))}</h2>
-    <div class="detail-list">${detailRow("作者排序", paper.authors)}${detailRow("作者身份", paper.authorRoleLabel)}
+    <div class="detail-list">${detailRow("成果类型", paper.type)}${detailRow("发表日期", paper.publicationDate)}
+      ${authorsRow(paper.authors)}${detailRow("作者排序", paper.authorPosition)}${detailRow("作者身份", paper.authorRoleLabel)}
       ${detailRow("JCR 分区", ranks.jcr)}${detailRow("中科院分区", ranks.cas)}${detailRow("新锐学术", ranks.emerging)}
-      ${detailRow("个人贡献", paper.contribution)}${detailRow("DOI", paper.doi)}${detailRow("相关材料", paper.materialsLabel)}</div>`;
+      ${detailRow("个人贡献", paper.contributionDetail || paper.contribution)}${detailRow("英文贡献", paper.contributionEn)}${detailRow("ISSN", paper.issn)}
+      ${detailLinkRow("DOI", paper.doi, paper.articleUrl)}${detailLinkRow("论文原文", "访问出版社开放获取页面 ↗", paper.articleUrl)}
+      ${paper.pdfUrl ? detailLinkRow("PDF", "预览或下载 PDF ↗", paper.pdfUrl) : detailRow("PDF", "暂未上传；可通过出版社原文入口访问")}</div>`;
   $("#drawer-backdrop").hidden = false;
   $("#detail-drawer").classList.add("is-open");
   $("#detail-drawer").setAttribute("aria-hidden", "false");
@@ -128,6 +137,33 @@ function openPaper(id) {
 
 function detailRow(label, value) {
   return `<div class="detail-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(valueOr(value))}</span></div>`;
+}
+
+function authorsRow(authors = []) {
+  const content = authors.map(author => author === "Wenkang Huang"
+    ? `<strong class="author-self">${escapeHtml(author)}</strong>`
+    : escapeHtml(author)).join(" · ");
+  return `<div class="detail-row"><span>完整作者</span><span>${content || "待补充"}</span></div>`;
+}
+
+function detailLinkRow(label, text, url) {
+  if (!url) return detailRow(label, text);
+  return `<div class="detail-row"><span>${escapeHtml(label)}</span><span><a class="detail-link" href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(valueOr(text))}</a></span></div>`;
+}
+
+function setRanking(ranking) {
+  state.ranking = ranking;
+  $$('[data-ranking]').forEach(item => {
+    const active = item.dataset.ranking === ranking;
+    item.classList.toggle("is-active", active);
+    item.setAttribute("aria-pressed", String(active));
+  });
+  if (state.research) renderResearch();
+}
+
+function cycleRanking() {
+  const current = RANKING_ORDER.indexOf(state.ranking);
+  setRanking(RANKING_ORDER[(current + 1) % RANKING_ORDER.length]);
 }
 
 function closeDrawer() {
@@ -168,15 +204,7 @@ function showToast(message) {
 }
 
 $$('[data-page]').forEach(button => button.addEventListener("click", () => switchPage(button.dataset.page)));
-$$('[data-ranking]').forEach(button => button.addEventListener("click", () => {
-  state.ranking = button.dataset.ranking;
-  $$('[data-ranking]').forEach(item => {
-    const active = item === button;
-    item.classList.toggle("is-active", active);
-    item.setAttribute("aria-pressed", String(active));
-  });
-  if (state.research) renderResearch();
-}));
+$$('[data-ranking]').forEach(button => button.addEventListener("click", () => setRanking(button.dataset.ranking)));
 $("#drawer-close").addEventListener("click", closeDrawer);
 $("#drawer-backdrop").addEventListener("click", closeDrawer);
 document.addEventListener("keydown", event => { if (event.key === "Escape") closeDrawer(); });

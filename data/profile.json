@@ -1,15 +1,20 @@
 {
   "schemaVersion": 1,
   "profile": {
-    "name": "",
-    "nameEn": "",
-    "photo": "",
-    "institution": "",
-    "major": "",
-    "degree": "",
+    "name": "黄文康",
+    "nameEn": "Wenkang Huang",
+    "photo": "assets/profile/profile-photo.webp",
+    "institution": "广东财经大学",
+    "major": "设计学",
+    "degree": "研二",
     "researchInterests": [],
     "bio": "",
-    "contacts": [],
+    "contacts": [
+      {
+        "label": "18666039372",
+        "url": "tel:18666039372"
+      }
+    ],
     "resumePdf": ""
   }
 }

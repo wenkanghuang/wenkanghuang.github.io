@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20261031-6";
+const ASSET_VERSION = "20261031-7";
 const DATA_PATHS = {
   profile: `data/profile.json?v=${ASSET_VERSION}`,
   research: `data/research.json?v=${ASSET_VERSION}`,
@@ -98,12 +98,14 @@ function renderPaperCard(paper) {
   const cas = valueOr(paper.rankings?.cas).replace(/^中科院/, "中科院-");
   const hasImage = Boolean(paper.coverImage);
   const media = hasImage ? `<span class="card-media"><img src="${escapeHtml(versionedAsset(paper.coverImage))}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy" decoding="async"><span class="card-overlay">${escapeHtml(valueOr(paper.authorRoleLabel))}</span></span>` : "";
-  const textRole = hasImage ? "" : `<span class="card-text-role">${escapeHtml(valueOr(paper.authorRoleLabel))}</span>`;
+  const kickerLabel = hasImage
+    ? `<span>${escapeHtml(valueOr(paper.journal))}</span>`
+    : `<strong class="card-author-position">${escapeHtml(valueOr(paper.authorPosition, paper.authorRoleLabel))}</strong>`;
   const contribution = paper.contribution ? `<p><strong>个人贡献：</strong>${escapeHtml(paper.contribution)}</p>` : "";
   return `<article class="work-card${hasImage ? "" : " work-card-no-image"}" data-id="${escapeHtml(paper.id)}">
-    <div class="card-kicker"><span>${escapeHtml(valueOr(paper.journal))}</span><span class="card-rankings"><span>${escapeHtml(jcr)}</span><span>${escapeHtml(cas)}</span></span></div>
+    <div class="card-kicker">${kickerLabel}<span class="card-rankings"><span>${escapeHtml(jcr)}</span><span>${escapeHtml(cas)}</span></span></div>
     <button class="card-open" type="button" data-id="${escapeHtml(paper.id)}" aria-label="查看论文：${escapeHtml(paper.title)}">
-      ${media}<span class="card-body">${textRole}<h3>${escapeHtml(valueOr(paper.title))}</h3>${contribution}</span>
+      ${media}<span class="card-body"><h3>${escapeHtml(valueOr(paper.title))}</h3>${contribution}</span>
     </button>
   </article>`;
 }
@@ -166,7 +168,7 @@ function openStats(type) {
   $("#stats-popover-title").textContent = definition.title;
   $("#stats-popover-content").innerHTML = definition.items.length
     ? definition.items.map(item => definition.kind === "paper"
-      ? `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title))}</h4><p>${escapeHtml(valueOr(item.authorPosition, item.authorRoleLabel))} · ${escapeHtml(valueOr(item.journal))} · ${escapeHtml(valueOr(item.rankings?.jcr))} · ${escapeHtml(valueOr(item.rankings?.cas))}</p></article>`
+      ? `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title))}</h4><p><strong class="stats-author-position">${escapeHtml(valueOr(item.authorPosition, item.authorRoleLabel))}</strong><span>${escapeHtml(valueOr(item.journal))} · ${escapeHtml(valueOr(item.rankings?.jcr))} · ${escapeHtml(valueOr(item.rankings?.cas))}</span></p></article>`
       : `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title || item.name))}</h4><p>${escapeHtml(valueOr(item.role || item.status, "基本信息待补充"))}</p></article>`).join("")
     : `<p class="stats-empty">${escapeHtml(definition.empty)}</p>`;
   $("#stats-backdrop").hidden = false;

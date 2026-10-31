@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20261031-5";
+const ASSET_VERSION = "20261031-6";
 const DATA_PATHS = {
   profile: `data/profile.json?v=${ASSET_VERSION}`,
   research: `data/research.json?v=${ASSET_VERSION}`,
@@ -116,13 +116,32 @@ function renderDesign() {
 }
 
 function renderAwards() {
-  const items = (state.awards.awards || []).filter(item => item.public !== false);
-  renderStats($("#awards-stats"), [
-    [items.filter(item => item.level === "national").length, "国家级奖项"],
-    [items.filter(item => item.level === "provincial").length, "省级奖项"],
-    [items.filter(item => item.level === "other").length, "其他荣誉"]
-  ]);
-  if (!items.length) renderEmpty($("#awards-grid"), "荣誉与其他占位区", "尚未录入已确认公开的真实奖项或荣誉，后续将依据 awards.json 自动统计。");
+  const items = (state.awards.awards || [])
+    .filter(item => item.public !== false)
+    .sort((a, b) => String(b.date || b.year || "").localeCompare(String(a.date || a.year || "")));
+  const levels = [
+    { key: "national", label: "国家级", statLabel: "国家级奖项" },
+    { key: "provincial", label: "省级", statLabel: "省级奖项" },
+    { key: "other", label: "其他荣誉", statLabel: "其他荣誉" }
+  ];
+  renderStats($("#awards-stats"), levels.map(level => [items.filter(item => item.level === level.key).length, level.statLabel]));
+  const grid = $("#awards-grid");
+  if (!items.length) return renderEmpty(grid, "荣誉与其他占位区", "尚未录入已确认公开的真实奖项或荣誉，后续将依据 awards.json 自动统计。");
+  grid.innerHTML = levels.map(level => {
+    const groupedItems = items.filter(item => item.level === level.key);
+    return `<section class="award-group" aria-labelledby="award-group-${level.key}">
+      <div class="award-group-header"><h3 id="award-group-${level.key}">${level.label}</h3><span>${groupedItems.length} 项</span></div>
+      <div class="award-list">${groupedItems.map(renderAwardCard).join("")}</div>
+    </section>`;
+  }).join("");
+}
+
+function renderAwardCard(item) {
+  return `<article class="award-card">
+    <div class="award-meta"><span>${escapeHtml(valueOr(item.date || item.year))}</span><span>${escapeHtml(valueOr(item.summary))}</span></div>
+    <h4>${escapeHtml(valueOr(item.title))}</h4>
+    <p>${escapeHtml(valueOr(item.organization))}</p>
+  </article>`;
 }
 
 function renderStats(container, stats, interactive = false) {

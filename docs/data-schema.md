@@ -28,4 +28,6 @@
 
 - `awards`：荣誉数组。
 - `level`：`national`、`provincial` 或 `other`，用于自动统计。
+- `date`：证书年月；`summary`：奖项等级、作者排序或成果状态的简要说明。
 - `public`：是否已确认可公开；正式录入时仅展示 `true` 的内容。
+- `certificateImage` 默认留空；只有用户明确要求公开证书图片时才关联文件。

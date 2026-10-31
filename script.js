@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20261031-7";
+const ASSET_VERSION = "20261031-8";
 const DATA_PATHS = {
   profile: `data/profile.json?v=${ASSET_VERSION}`,
   research: `data/research.json?v=${ASSET_VERSION}`,
@@ -94,20 +94,27 @@ function renderResearch() {
 }
 
 function renderPaperCard(paper) {
-  const jcr = valueOr(paper.rankings?.jcr).replace(/\s+/g, "-");
-  const cas = valueOr(paper.rankings?.cas).replace(/^中科院/, "中科院-");
+  const rankings = getPaperRankingLabels(paper);
   const hasImage = Boolean(paper.coverImage);
   const media = hasImage ? `<span class="card-media"><img src="${escapeHtml(versionedAsset(paper.coverImage))}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy" decoding="async"><span class="card-overlay">${escapeHtml(valueOr(paper.authorRoleLabel))}</span></span>` : "";
   const kickerLabel = hasImage
     ? `<span>${escapeHtml(valueOr(paper.journal))}</span>`
     : `<strong class="card-author-position">${escapeHtml(valueOr(paper.authorPosition, paper.authorRoleLabel))}</strong>`;
+  const rankingMarkup = rankings.length ? `<span class="card-rankings">${rankings.map(label => `<span>${escapeHtml(label)}</span>`).join("")}</span>` : "";
   const contribution = paper.contribution ? `<p><strong>个人贡献：</strong>${escapeHtml(paper.contribution)}</p>` : "";
   return `<article class="work-card${hasImage ? "" : " work-card-no-image"}" data-id="${escapeHtml(paper.id)}">
-    <div class="card-kicker">${kickerLabel}<span class="card-rankings"><span>${escapeHtml(jcr)}</span><span>${escapeHtml(cas)}</span></span></div>
+    <div class="card-kicker">${kickerLabel}${rankingMarkup}</div>
     <button class="card-open" type="button" data-id="${escapeHtml(paper.id)}" aria-label="查看论文：${escapeHtml(paper.title)}">
       ${media}<span class="card-body"><h3>${escapeHtml(valueOr(paper.title))}</h3>${contribution}</span>
     </button>
   </article>`;
+}
+
+function getPaperRankingLabels(paper) {
+  const classification = String(paper.rankings?.classification || "").trim();
+  const jcr = String(paper.rankings?.jcr || "").trim().replace(/\s+/g, "-");
+  const cas = String(paper.rankings?.cas || "").trim().replace(/^中科院/, "中科院-");
+  return [classification, jcr, cas].filter(Boolean);
 }
 
 function renderDesign() {
@@ -139,10 +146,13 @@ function renderAwards() {
 }
 
 function renderAwardCard(item) {
+  const result = String(item.summary || "")
+    .replace(/\s*·\s*第[一二三四五六七八九十\d]+作者\s*$/, "")
+    .replace(/^第[一二三四五六七八九十\d]+作者$/, "")
+    .trim();
   return `<article class="award-card">
-    <div class="award-meta"><span>${escapeHtml(valueOr(item.date || item.year))}</span><span>${escapeHtml(valueOr(item.summary))}</span></div>
     <h4>${escapeHtml(valueOr(item.title))}</h4>
-    <p>${escapeHtml(valueOr(item.organization))}</p>
+    <div class="award-footer"><p>${escapeHtml(valueOr(item.organization))}</p>${result ? `<strong>${escapeHtml(result)}</strong>` : ""}</div>
   </article>`;
 }
 
@@ -168,7 +178,7 @@ function openStats(type) {
   $("#stats-popover-title").textContent = definition.title;
   $("#stats-popover-content").innerHTML = definition.items.length
     ? definition.items.map(item => definition.kind === "paper"
-      ? `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title))}</h4><p><strong class="stats-author-position">${escapeHtml(valueOr(item.authorPosition, item.authorRoleLabel))}</strong><span>${escapeHtml(valueOr(item.journal))} · ${escapeHtml(valueOr(item.rankings?.jcr))} · ${escapeHtml(valueOr(item.rankings?.cas))}</span></p></article>`
+      ? `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title))}</h4><p><strong class="stats-author-position">${escapeHtml(valueOr(item.authorPosition, item.authorRoleLabel))}</strong><span>${escapeHtml([item.journal, ...getPaperRankingLabels(item)].filter(Boolean).join(" · "))}</span></p></article>`
       : `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title || item.name))}</h4><p>${escapeHtml(valueOr(item.role || item.status, "基本信息待补充"))}</p></article>`).join("")
     : `<p class="stats-empty">${escapeHtml(definition.empty)}</p>`;
   $("#stats-backdrop").hidden = false;

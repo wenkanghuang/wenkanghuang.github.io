@@ -31,3 +31,5 @@
 - `date`：证书年月；`summary`：奖项等级、作者排序或成果状态的简要说明。
 - `public`：是否已确认可公开；正式录入时仅展示 `true` 的内容。
 - `certificateImage` 默认留空；只有用户明确要求公开证书图片时才关联文件。
+
+科研成果的 `rankings.classification` 用于记录“普刊”“南核”等不属于 JCR 或中科院分区的期刊分类。

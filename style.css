@@ -69,9 +69,9 @@ main { max-width: var(--max); margin: auto; padding-left: var(--gutter); padding
 .card-open { display: block; width: 100%; border: 0; padding: 0; background: transparent; text-align: left; cursor: pointer; transition: transform .1s ease-out; }
 .card-open:active { transform: scale(.99); }
 .card-body { display: block; padding: 14px 0 8px; }
-.card-kicker { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 0; margin-bottom: 14px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.card-kicker { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 0; margin-bottom: 14px; color: var(--muted); font-size: 10px; letter-spacing: .06em; }
 .card-kicker > span:first-child { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.card-author-position { min-width: 0; color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+.card-author-position { min-width: 0; color: var(--ink); font: inherit; font-weight: 700; white-space: nowrap; }
 .card-rankings { display: flex; flex: 0 0 auto; flex-wrap: nowrap; justify-content: flex-end; gap: 4px; white-space: nowrap; }
 .card-rankings span { flex: 0 0 auto; padding: 5px 7px; border-radius: 8px; background: #fff; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.08); font-size: 9px; letter-spacing: .02em; }
 .card-body h3 { margin: 0; font-size: clamp(19px, 2vw, 29px); line-height: 1.22; letter-spacing: -.025em; font-weight: 520; }
@@ -87,11 +87,11 @@ main { max-width: var(--max); margin: auto; padding-left: var(--gutter); padding
 .award-group-header h3 { margin: 0; font-size: clamp(24px, 3vw, 38px); line-height: 1; letter-spacing: -.04em; font-weight: 520; }
 .award-group-header span { color: var(--muted); font-size: 12px; }
 .award-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.award-card { min-width: 0; padding: 22px; border-radius: 18px; background: var(--soft); }
-.award-meta { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 22px; color: var(--muted); font-size: 11px; line-height: 1.5; }
-.award-meta span:last-child { color: var(--ink); text-align: right; }
-.award-card h4 { margin: 0; font-size: clamp(17px, 1.6vw, 22px); line-height: 1.35; letter-spacing: -.02em; font-weight: 560; }
-.award-card p { margin: 14px 0 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.award-card { display: flex; flex-direction: column; min-width: 0; min-height: 132px; padding: 22px; border-radius: 18px; background: var(--soft); }
+.award-card h4 { margin: 0; font-size: clamp(10px, .8vw, 12px); line-height: 1.5; letter-spacing: 0; font-weight: 560; }
+.award-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-top: auto; padding-top: 24px; }
+.award-footer p { flex: 1 1 auto; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.award-footer strong { flex: 0 0 auto; color: var(--ink); font-size: 12px; line-height: 1.65; text-align: right; white-space: nowrap; }
 
 .site-footer { padding-top: 24px; padding-bottom: 42px; display: flex; justify-content: space-between; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .site-footer p { margin: 0; }
@@ -162,7 +162,7 @@ body.stats-open { overflow: hidden; }
   .award-groups { margin-top: 30px; gap: 36px; }
   .award-list { grid-template-columns: 1fr; }
   .award-card { padding: 18px; border-radius: 16px; }
-  .award-meta { margin-bottom: 16px; }
+  .award-footer { padding-top: 20px; }
   .detail-drawer { top: 0; right: 0; bottom: 0; left: auto; width: 80vw; padding: 64px 16px 34px; border: 0; border-radius: 0; }
   .detail-drawer h2 { font-size: clamp(24px, 7vw, 34px); }
   .detail-row { grid-template-columns: 92px 1fr; }

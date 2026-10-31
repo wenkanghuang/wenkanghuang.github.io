@@ -11,23 +11,16 @@
 <body>
   <a class="skip-link" href="#main-content">跳到主要内容</a>
 
-  <header class="site-header">
-    <a class="wordmark" href="#research" aria-label="返回科研成果首页">
-      <span class="wordmark-mark">WH</span>
-      <span>Academic Portfolio</span>
-    </a>
-    <nav class="primary-nav" aria-label="主要页面">
-      <button class="nav-link is-active" type="button" data-page="research" aria-current="page">科研成果 <span>Research</span></button>
-      <button class="nav-link" type="button" data-page="design">设计实践 <span>Design</span></button>
-      <button class="nav-link" type="button" data-page="awards">荣誉与其他 <span>Awards &amp; More</span></button>
-    </nav>
-  </header>
+  <nav class="primary-nav" aria-label="主要页面">
+    <button class="nav-link is-active" type="button" data-page="research" aria-current="page">科研成果 <span>Research</span></button>
+    <button class="nav-link" type="button" data-page="design">设计实践 <span>Design</span></button>
+    <button class="nav-link" type="button" data-page="awards">荣誉与其他 <span>Awards &amp; More</span></button>
+  </nav>
 
   <main id="main-content">
     <section class="profile-shell" aria-labelledby="profile-name">
       <div class="profile-photo" id="profile-photo" aria-hidden="true"><span>PHOTO</span></div>
       <div class="profile-intro">
-        <p class="eyebrow">Academic profile · 学术主页</p>
         <h1 id="profile-name">个人信息待补充</h1>
         <p class="profile-role" id="profile-role">学校 / 专业 / 学历</p>
         <p class="profile-bio" id="profile-bio" hidden></p>
@@ -39,18 +32,7 @@
       <div class="section-heading">
         <div><p class="eyebrow">01 / Selected scholarship</p><h2 id="research-title">科研成果</h2></div>
       </div>
-      <div class="stats-grid" id="research-stats" aria-label="科研成果统计"></div>
-      <div class="toolbar">
-        <div>
-          <p class="toolbar-label">期刊分区显示</p>
-          <div class="segmented-control" id="ranking-switch" role="group" aria-label="选择期刊分区体系">
-            <button type="button" class="is-active" data-ranking="jcr" aria-pressed="true">JCR</button>
-            <button type="button" data-ranking="cas" aria-pressed="false">中科院</button>
-            <button type="button" data-ranking="emerging" aria-pressed="false">新锐学术</button>
-          </div>
-        </div>
-        <p class="result-count" id="research-count">0 项成果</p>
-      </div>
+      <div class="stats-grid research-stats" id="research-stats" aria-label="科研成果统计"></div>
       <div class="masonry-grid" id="research-grid" aria-live="polite"></div>
     </section>
 
@@ -75,8 +57,16 @@
 
   <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
   <aside class="detail-drawer" id="detail-drawer" aria-labelledby="detail-title" aria-hidden="true">
-    <button class="drawer-close" id="drawer-close" type="button" aria-label="关闭详情">×</button>
+    <button class="drawer-close" id="drawer-close" type="button" aria-label="收起论文详情">←</button>
     <div id="detail-content"></div>
+  </aside>
+
+  <div class="stats-backdrop" id="stats-backdrop" hidden></div>
+  <aside class="stats-popover" id="stats-popover" role="dialog" aria-modal="true" aria-labelledby="stats-popover-title" aria-hidden="true">
+    <button class="stats-close" id="stats-close" type="button" aria-label="关闭统计详情">×</button>
+    <p class="eyebrow" id="stats-popover-label"></p>
+    <h3 id="stats-popover-title">统计详情</h3>
+    <div id="stats-popover-content"></div>
   </aside>
   <div class="status-toast" id="status-toast" role="status" hidden></div>
 </body>

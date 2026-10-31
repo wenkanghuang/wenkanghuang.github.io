@@ -5,9 +5,9 @@ const DATA_PATHS = {
   awards: "data/awards.json"
 };
 
-const state = { profile: null, research: null, design: null, awards: null, ranking: "jcr", activePage: "research", lastFocus: null };
-const RANKING_ORDER = ["jcr", "cas", "emerging"];
+const state = { profile: null, research: null, design: null, awards: null, activePage: "research", lastFocus: null, lastStatFocus: null };
 let drawerCloseTimer;
+let statsCloseTimer;
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const valueOr = (value, fallback = "待补充") => value && String(value).trim() ? value : fallback;
@@ -60,24 +60,23 @@ function renderResearch() {
   const papers = state.research.papers || [];
   const projects = state.research.projects || [];
   renderStats($("#research-stats"), [
-    [papers.filter(item => ["published", "accepted"].includes(item.status)).length, "已发表及已录用论文"],
-    [papers.filter(item => ["first", "co-first"].includes(item.authorRole)).length, "第一作者及共同一作"],
-    [papers.filter(item => item.status === "under-review").length, "正在投稿论文"],
-    [projects.length, "参与科研课题"]
-  ]);
-  $("#research-count").textContent = `${papers.length} 项成果`;
+    [papers.filter(item => ["published", "accepted"].includes(item.status)).length, "已发表及已录用论文", "published"],
+    [papers.filter(item => item.status === "under-review").length, "正在投稿论文", "under-review"],
+    [projects.length, "参与科研课题", "projects"]
+  ], true);
+  $$(".stat-button", $("#research-stats")).forEach(button => button.addEventListener("click", () => openStats(button.dataset.stat)));
   const grid = $("#research-grid");
   if (!papers.length) return renderEmpty(grid, "科研成果占位区", "尚未录入真实论文。后续将从 research.json 自动生成错落卡片、统计与详情。");
   grid.innerHTML = papers.map(renderPaperCard).join("");
   $$(".card-open", grid).forEach(card => card.addEventListener("click", () => openPaper(card.dataset.id)));
-  $$(".card-ranking", grid).forEach(button => button.addEventListener("click", cycleRanking));
 }
 
 function renderPaperCard(paper) {
-  const ranking = paper.rankings?.[state.ranking] || "待补充";
+  const jcr = valueOr(paper.rankings?.jcr).replace(/\s+/g, "-");
+  const cas = valueOr(paper.rankings?.cas).replace(/^中科院/, "中科院-");
   const media = paper.coverImage ? `<img src="${escapeHtml(paper.coverImage)}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy">` : "";
   return `<article class="work-card" data-id="${escapeHtml(paper.id)}">
-    <div class="card-kicker"><span>${escapeHtml(valueOr(paper.journal))}</span><button class="card-ranking" type="button" aria-label="切换期刊分区，当前为 ${escapeHtml(ranking)}">${escapeHtml(ranking)}</button></div>
+    <div class="card-kicker"><span>${escapeHtml(valueOr(paper.journal))}</span><span class="card-rankings"><span>${escapeHtml(jcr)}</span><span>${escapeHtml(cas)}</span></span></div>
     <button class="card-open" type="button" data-id="${escapeHtml(paper.id)}" aria-label="查看论文：${escapeHtml(paper.title)}">
       <span class="card-media">${media}<span class="card-overlay">${escapeHtml(valueOr(paper.authorRoleLabel))}</span></span>
       <span class="card-body"><h3>${escapeHtml(valueOr(paper.title))}</h3><p><strong>个人贡献：</strong>${escapeHtml(valueOr(paper.contribution, "待补充"))}</p></span>
@@ -102,8 +101,49 @@ function renderAwards() {
   if (!items.length) renderEmpty($("#awards-grid"), "荣誉与其他占位区", "尚未录入已确认公开的真实奖项或荣誉，后续将依据 awards.json 自动统计。");
 }
 
-function renderStats(container, stats) {
-  container.innerHTML = stats.map(([value, label]) => `<div class="stat"><strong class="stat-value">${escapeHtml(String(value))}</strong><span class="stat-label">${escapeHtml(label)}</span></div>`).join("");
+function renderStats(container, stats, interactive = false) {
+  container.innerHTML = stats.map(([value, label, key]) => interactive
+    ? `<button class="stat stat-button" type="button" data-stat="${escapeHtml(key)}" aria-label="查看${escapeHtml(label)}详情"><strong class="stat-value">${escapeHtml(String(value))}</strong><span class="stat-label">${escapeHtml(label)}</span><span class="stat-hint">查看简要信息 ↗</span></button>`
+    : `<div class="stat"><strong class="stat-value">${escapeHtml(String(value))}</strong><span class="stat-label">${escapeHtml(label)}</span></div>`).join("");
+}
+
+function openStats(type) {
+  const papers = state.research.papers || [];
+  const projects = state.research.projects || [];
+  const definitions = {
+    published: { title: "已发表及已录用论文", items: papers.filter(item => ["published", "accepted"].includes(item.status)), kind: "paper", empty: "暂无已发表或已录用论文。" },
+    "under-review": { title: "正在投稿论文", items: papers.filter(item => item.status === "under-review"), kind: "paper", empty: "暂无正在投稿论文。" },
+    projects: { title: "参与科研课题", items: projects, kind: "project", empty: "暂无科研课题。" }
+  };
+  const definition = definitions[type];
+  if (!definition) return;
+  clearTimeout(statsCloseTimer);
+  state.lastStatFocus = document.activeElement;
+  $("#stats-popover-label").textContent = "科研成果统计";
+  $("#stats-popover-title").textContent = definition.title;
+  $("#stats-popover-content").innerHTML = definition.items.length
+    ? definition.items.map(item => definition.kind === "paper"
+      ? `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title))}</h4><p>${escapeHtml(valueOr(item.authorPosition, item.authorRoleLabel))} · ${escapeHtml(valueOr(item.journal))} · ${escapeHtml(valueOr(item.rankings?.jcr))} · ${escapeHtml(valueOr(item.rankings?.cas))}</p></article>`
+      : `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title || item.name))}</h4><p>${escapeHtml(valueOr(item.role || item.status, "基本信息待补充"))}</p></article>`).join("")
+    : `<p class="stats-empty">${escapeHtml(definition.empty)}</p>`;
+  $("#stats-backdrop").hidden = false;
+  $("#stats-popover").classList.add("is-open");
+  $("#stats-popover").setAttribute("aria-hidden", "false");
+  document.body.classList.add("stats-open");
+  $("#stats-close").focus();
+}
+
+function closeStats() {
+  if ($("#stats-popover").getAttribute("aria-hidden") === "true") return;
+  $("#stats-popover").classList.remove("is-open");
+  $("#stats-popover").setAttribute("aria-hidden", "true");
+  document.body.classList.remove("stats-open");
+  const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 220;
+  clearTimeout(statsCloseTimer);
+  statsCloseTimer = setTimeout(() => {
+    if (!$("#stats-popover").classList.contains("is-open")) $("#stats-backdrop").hidden = true;
+  }, delay);
+  state.lastStatFocus?.focus();
 }
 
 function renderEmpty(container, title, text) {
@@ -139,21 +179,6 @@ function detailRow(label, value) {
 function detailLinkRow(label, text, url) {
   if (!url) return detailRow(label, text);
   return `<div class="detail-row"><span>${escapeHtml(label)}</span><span><a class="detail-link" href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(valueOr(text))}</a></span></div>`;
-}
-
-function setRanking(ranking) {
-  state.ranking = ranking;
-  $$('[data-ranking]').forEach(item => {
-    const active = item.dataset.ranking === ranking;
-    item.classList.toggle("is-active", active);
-    item.setAttribute("aria-pressed", String(active));
-  });
-  if (state.research) renderResearch();
-}
-
-function cycleRanking() {
-  const current = RANKING_ORDER.indexOf(state.ranking);
-  setRanking(RANKING_ORDER[(current + 1) % RANKING_ORDER.length]);
 }
 
 function closeDrawer() {
@@ -199,10 +224,15 @@ function showToast(message) {
 }
 
 $$('[data-page]').forEach(button => button.addEventListener("click", () => switchPage(button.dataset.page)));
-$$('[data-ranking]').forEach(button => button.addEventListener("click", () => setRanking(button.dataset.ranking)));
 $("#drawer-close").addEventListener("click", closeDrawer);
 $("#drawer-backdrop").addEventListener("click", closeDrawer);
-document.addEventListener("keydown", event => { if (event.key === "Escape") closeDrawer(); });
+$("#stats-close").addEventListener("click", closeStats);
+$("#stats-backdrop").addEventListener("click", closeStats);
+document.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  closeStats();
+  closeDrawer();
+});
 
 const initialPage = location.hash.slice(1);
 if (["research", "design", "awards"].includes(initialPage)) switchPage(initialPage, false);

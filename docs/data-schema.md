@@ -12,6 +12,7 @@
 ## research.json
 
 - `papers`：论文数组；`status` 和 `authorRole` 用于自动统计，作者名单使用字符串数组。
+- `statusLabel`：未正式发表论文的当前阶段，如“校稿中”“编辑任务中”“同行评审中”；此类条目的 `title` 仅保存“期刊名（当前状态）”。
 - `rankings`：同一论文的 JCR、中科院、新锐学术分区。
 - `detailImage` / `detailAlt`：详情页主图版路径及可访问性说明；多张相关图片优先预先合并，减少网页请求。
 - `detailImages`：需要独立展示时使用的补充图片数组，每项包含 `src` 与可访问性说明 `alt`。

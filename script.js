@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20261031-4";
+const ASSET_VERSION = "20261031-5";
 const DATA_PATHS = {
   profile: `data/profile.json?v=${ASSET_VERSION}`,
   research: `data/research.json?v=${ASSET_VERSION}`,
@@ -99,10 +99,11 @@ function renderPaperCard(paper) {
   const hasImage = Boolean(paper.coverImage);
   const media = hasImage ? `<span class="card-media"><img src="${escapeHtml(versionedAsset(paper.coverImage))}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy" decoding="async"><span class="card-overlay">${escapeHtml(valueOr(paper.authorRoleLabel))}</span></span>` : "";
   const textRole = hasImage ? "" : `<span class="card-text-role">${escapeHtml(valueOr(paper.authorRoleLabel))}</span>`;
+  const contribution = paper.contribution ? `<p><strong>个人贡献：</strong>${escapeHtml(paper.contribution)}</p>` : "";
   return `<article class="work-card${hasImage ? "" : " work-card-no-image"}" data-id="${escapeHtml(paper.id)}">
     <div class="card-kicker"><span>${escapeHtml(valueOr(paper.journal))}</span><span class="card-rankings"><span>${escapeHtml(jcr)}</span><span>${escapeHtml(cas)}</span></span></div>
     <button class="card-open" type="button" data-id="${escapeHtml(paper.id)}" aria-label="查看论文：${escapeHtml(paper.title)}">
-      ${media}<span class="card-body">${textRole}<h3>${escapeHtml(valueOr(paper.title))}</h3><p><strong>个人贡献：</strong>${escapeHtml(valueOr(paper.contribution, "待补充"))}</p></span>
+      ${media}<span class="card-body">${textRole}<h3>${escapeHtml(valueOr(paper.title))}</h3>${contribution}</span>
     </button>
   </article>`;
 }
@@ -184,12 +185,13 @@ function openPaper(id) {
   ];
   const galleryMarkup = gallery.length ? `<div class="detail-gallery">${gallery.map(image => `<img class="detail-image" src="${escapeHtml(versionedAsset(image.src))}" alt="${escapeHtml(image.alt || paper.title)}" decoding="async">`).join("")}</div>` : "";
   const detailRows = [
-    detailRow("发表日期", paper.publicationDate),
-    detailRow("个人贡献", paper.contributionDetail || paper.contribution),
-    detailRow("ISSN", paper.issn),
+    paper.statusLabel ? detailRow("当前状态", paper.statusLabel) : "",
+    paper.publicationDate ? detailRow("发表日期", paper.publicationDate) : "",
+    paper.contributionDetail || paper.contribution ? detailRow("个人贡献", paper.contributionDetail || paper.contribution) : "",
+    paper.issn ? detailRow("ISSN", paper.issn) : "",
     paper.doi ? detailLinkRow("DOI", paper.doi, paper.articleUrl) : "",
     paper.articleUrl ? detailLinkRow("论文原文", "访问出版社开放获取页面 ↗", paper.articleUrl) : "",
-    paper.pdfUrl ? detailLinkRow("PDF", "预览或下载 PDF ↗", paper.pdfUrl) : detailRow("PDF", paper.articleUrl ? "暂未上传；可通过出版社原文入口访问" : "暂未公开")
+    paper.pdfUrl ? detailLinkRow("PDF", "预览或下载 PDF ↗", paper.pdfUrl) : (paper.articleUrl ? detailRow("PDF", "暂未上传；可通过出版社原文入口访问") : "")
   ].join("");
   $("#detail-content").innerHTML = `<p class="eyebrow">${escapeHtml(valueOr(paper.journal))}</p><h2 id="detail-title">${escapeHtml(valueOr(paper.title))}</h2>
     ${galleryMarkup}<div class="detail-list">${detailRows}</div>`;

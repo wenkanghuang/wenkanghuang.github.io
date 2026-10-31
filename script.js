@@ -1,8 +1,9 @@
+const ASSET_VERSION = "20261031-3";
 const DATA_PATHS = {
-  profile: "data/profile.json",
-  research: "data/research.json",
-  design: "data/design.json",
-  awards: "data/awards.json"
+  profile: `data/profile.json?v=${ASSET_VERSION}`,
+  research: `data/research.json?v=${ASSET_VERSION}`,
+  design: `data/design.json?v=${ASSET_VERSION}`,
+  awards: `data/awards.json?v=${ASSET_VERSION}`
 };
 
 const state = { profile: null, research: null, design: null, awards: null, activePage: "research", lastFocus: null, lastStatFocus: null };
@@ -11,13 +12,12 @@ let statsCloseTimer;
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const valueOr = (value, fallback = "待补充") => value && String(value).trim() ? value : fallback;
+const versionedAsset = path => path ? `${path}${path.includes("?") ? "&" : "?"}v=${ASSET_VERSION}` : path;
 
 async function loadData() {
   try {
     const entries = await Promise.all(Object.entries(DATA_PATHS).map(async ([key, path]) => {
-      const response = await fetch(path);
-      if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-      return [key, await response.json()];
+      return [key, await fetchJson(path)];
     }));
     Object.assign(state, Object.fromEntries(entries));
     renderAll();
@@ -26,6 +26,28 @@ async function loadData() {
     showToast("数据加载失败，请通过本地 HTTP 服务器打开网站。");
     renderEmpty($("#research-grid"), "数据暂时无法读取", "请检查 JSON 文件路径，或使用本地静态服务器预览。");
   }
+}
+
+async function fetchJson(path) {
+  if (window.fetch) {
+    try {
+      const response = await fetch(path, { cache: "no-store" });
+      if (response.ok) return response.json();
+    } catch (error) {
+      console.warn(`Fetch 读取失败，尝试兼容模式：${path}`, error);
+    }
+  }
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("GET", `${path}&t=${Date.now()}`, true);
+    request.onload = () => {
+      if (request.status < 200 || request.status >= 300) return reject(new Error(`${path}: HTTP ${request.status}`));
+      try { resolve(JSON.parse(request.responseText)); }
+      catch (error) { reject(error); }
+    };
+    request.onerror = () => reject(new Error(`${path}: 网络请求失败`));
+    request.send();
+  });
 }
 
 function renderAll() {
@@ -44,7 +66,7 @@ function renderProfile(profile) {
   bio.hidden = !profile.bio;
   const photo = $("#profile-photo");
   photo.innerHTML = profile.photo
-    ? `<img src="${escapeHtml(profile.photo)}" alt="${escapeHtml(profile.name || "个人照片")}">`
+    ? `<img src="${escapeHtml(versionedAsset(profile.photo))}" alt="${escapeHtml(profile.name || "个人照片")}" decoding="async">`
     : "<span>PHOTO</span>";
   photo.setAttribute("aria-hidden", profile.photo ? "false" : "true");
 
@@ -60,7 +82,7 @@ function renderResearch() {
   const papers = state.research.papers || [];
   const projects = state.research.projects || [];
   renderStats($("#research-stats"), [
-    [papers.filter(item => ["published", "accepted"].includes(item.status)).length, "已发表及已录用论文", "published"],
+    [papers.filter(item => ["published", "accepted"].includes(item.status)).length, "发表/已录用论文", "published"],
     [papers.filter(item => item.status === "under-review").length, "正在投稿论文", "under-review"],
     [projects.length, "参与科研课题", "projects"]
   ], true);
@@ -74,7 +96,7 @@ function renderResearch() {
 function renderPaperCard(paper) {
   const jcr = valueOr(paper.rankings?.jcr).replace(/\s+/g, "-");
   const cas = valueOr(paper.rankings?.cas).replace(/^中科院/, "中科院-");
-  const media = paper.coverImage ? `<img src="${escapeHtml(paper.coverImage)}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy">` : "";
+  const media = paper.coverImage ? `<img src="${escapeHtml(versionedAsset(paper.coverImage))}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy" decoding="async">` : "";
   return `<article class="work-card" data-id="${escapeHtml(paper.id)}">
     <div class="card-kicker"><span>${escapeHtml(valueOr(paper.journal))}</span><span class="card-rankings"><span>${escapeHtml(jcr)}</span><span>${escapeHtml(cas)}</span></span></div>
     <button class="card-open" type="button" data-id="${escapeHtml(paper.id)}" aria-label="查看论文：${escapeHtml(paper.title)}">
@@ -111,7 +133,7 @@ function openStats(type) {
   const papers = state.research.papers || [];
   const projects = state.research.projects || [];
   const definitions = {
-    published: { title: "已发表及已录用论文", items: papers.filter(item => ["published", "accepted"].includes(item.status)), kind: "paper", empty: "暂无已发表或已录用论文。" },
+    published: { title: "发表/已录用论文", items: papers.filter(item => ["published", "accepted"].includes(item.status)), kind: "paper", empty: "暂无已发表或已录用论文。" },
     "under-review": { title: "正在投稿论文", items: papers.filter(item => item.status === "under-review"), kind: "paper", empty: "暂无正在投稿论文。" },
     projects: { title: "参与科研课题", items: projects, kind: "project", empty: "暂无科研课题。" }
   };
@@ -156,11 +178,11 @@ function openPaper(id) {
   clearTimeout(drawerCloseTimer);
   state.lastFocus = document.activeElement;
   const gallery = [
-    ...(paper.detailImage || paper.coverImage ? [{ src: paper.detailImage || paper.coverImage, alt: paper.coverAlt || paper.title }] : []),
+    ...(paper.detailImage || paper.coverImage ? [{ src: paper.detailImage || paper.coverImage, alt: paper.detailAlt || paper.coverAlt || paper.title }] : []),
     ...(paper.detailImages || [])
   ];
   $("#detail-content").innerHTML = `<p class="eyebrow">${escapeHtml(valueOr(paper.journal))}</p><h2 id="detail-title">${escapeHtml(valueOr(paper.title))}</h2>
-    <div class="detail-gallery">${gallery.map(image => `<img class="detail-image" src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt || paper.title)}">`).join("")}</div>
+    <div class="detail-gallery">${gallery.map(image => `<img class="detail-image" src="${escapeHtml(versionedAsset(image.src))}" alt="${escapeHtml(image.alt || paper.title)}" decoding="async">`).join("")}</div>
     <div class="detail-list">${detailRow("发表日期", paper.publicationDate)}
       ${detailRow("个人贡献", paper.contributionDetail || paper.contribution)}${detailRow("ISSN", paper.issn)}
       ${detailLinkRow("DOI", paper.doi, paper.articleUrl)}${detailLinkRow("论文原文", "访问出版社开放获取页面 ↗", paper.articleUrl)}

@@ -28,17 +28,9 @@
       },
       "coverImage": "assets/papers/paper-001-cover.webp",
       "coverAlt": "明代中国外销与内销瓷碗形态测量类型学研究图",
-      "detailImage": "assets/papers/paper-001-cover.webp",
-      "detailImages": [
-        {
-          "src": "assets/papers/paper-001-detail-01.webp",
-          "alt": "瓷碗口径、高度、底径测量与曲线拟合示意图"
-        },
-        {
-          "src": "assets/papers/paper-001-detail-02.webp",
-          "alt": "瓷碗形态分类流向与类型分布图"
-        }
-      ],
+      "detailImage": "assets/papers/paper-001-details.webp",
+      "detailAlt": "明代中国瓷碗形态统计、测量拟合与类型分布合并图版",
+      "detailImages": [],
       "contribution": "论文撰写与返修回复工作",
       "contributionEn": "Manuscript Writing and Responses to Reviewers",
       "contributionDetail": "本人主要负责论文撰写及审稿意见回复工作。",
@@ -64,6 +56,7 @@
       "coverImage": "",
       "coverAlt": "",
       "detailImage": "",
+      "detailAlt": "",
       "detailImages": [],
       "contribution": "",
       "contributionEn": "",

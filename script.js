@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20261031-8";
+const ASSET_VERSION = "20261102-1";
 const DATA_PATHS = {
   profile: `data/profile.json?v=${ASSET_VERSION}`,
   research: `data/research.json?v=${ASSET_VERSION}`,
@@ -96,18 +96,32 @@ function renderResearch() {
 function renderPaperCard(paper) {
   const rankings = getPaperRankingLabels(paper);
   const hasImage = Boolean(paper.coverImage);
-  const media = hasImage ? `<span class="card-media"><img src="${escapeHtml(versionedAsset(paper.coverImage))}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy" decoding="async"><span class="card-overlay">${escapeHtml(valueOr(paper.authorRoleLabel))}</span></span>` : "";
+  const media = hasImage ? `<span class="card-media"><img src="${escapeHtml(versionedAsset(paper.coverImage))}" alt="${escapeHtml(paper.coverAlt || paper.title)}" loading="lazy" decoding="async"><span class="card-overlay">${escapeHtml(valueOr(paper.authorPosition, paper.authorRoleLabel))}</span></span>` : "";
   const kickerLabel = hasImage
     ? `<span>${escapeHtml(valueOr(paper.journal))}</span>`
     : `<strong class="card-author-position">${escapeHtml(valueOr(paper.authorPosition, paper.authorRoleLabel))}</strong>`;
   const rankingMarkup = rankings.length ? `<span class="card-rankings">${rankings.map(label => `<span>${escapeHtml(label)}</span>`).join("")}</span>` : "";
+  const progress = hasImage ? "" : renderPaperProgress(paper);
   const contribution = paper.contribution ? `<p><strong>个人贡献：</strong>${escapeHtml(paper.contribution)}</p>` : "";
   return `<article class="work-card${hasImage ? "" : " work-card-no-image"}" data-id="${escapeHtml(paper.id)}">
     <div class="card-kicker">${kickerLabel}${rankingMarkup}</div>
     <button class="card-open" type="button" data-id="${escapeHtml(paper.id)}" aria-label="查看论文：${escapeHtml(paper.title)}">
-      ${media}<span class="card-body"><h3>${escapeHtml(valueOr(paper.title))}</h3>${contribution}</span>
+      ${media}<span class="card-body"><h3>${escapeHtml(valueOr(paper.title))}</h3>${progress}${contribution}</span>
     </button>
   </article>`;
+}
+
+function renderPaperProgress(paper) {
+  const stages = ["投稿", "外审", "返修", "录用", "校稿"];
+  const status = `${paper.statusLabel || ""} ${paper.status || ""}`;
+  const currentIndex = /校稿/.test(status) ? 4
+    : /录用|accepted/.test(status) ? 3
+      : /返修/.test(status) ? 2
+        : /同行评审|外审/.test(status) ? 1
+          : 0;
+  return `<span class="paper-progress" role="img" aria-label="论文进度：当前${stages[currentIndex]}">
+    ${stages.map((stage, index) => `<span class="paper-progress-stage${index <= currentIndex ? " is-complete" : ""}${index === currentIndex ? " is-current" : ""}"><i aria-hidden="true"></i><b>${stage}</b></span>`).join("")}
+  </span>`;
 }
 
 function getPaperRankingLabels(paper) {
@@ -179,13 +193,18 @@ function openStats(type) {
   $("#stats-popover-content").innerHTML = definition.items.length
     ? definition.items.map(item => definition.kind === "paper"
       ? `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title))}</h4><p><strong class="stats-author-position">${escapeHtml(valueOr(item.authorPosition, item.authorRoleLabel))}</strong><span>${escapeHtml([item.journal, ...getPaperRankingLabels(item)].filter(Boolean).join(" · "))}</span></p></article>`
-      : `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title || item.name))}</h4><p>${escapeHtml(valueOr(item.role || item.status, "基本信息待补充"))}</p></article>`).join("")
+      : renderProjectStatsItem(item)).join("")
     : `<p class="stats-empty">${escapeHtml(definition.empty)}</p>`;
   $("#stats-backdrop").hidden = false;
   $("#stats-popover").classList.add("is-open");
   $("#stats-popover").setAttribute("aria-hidden", "false");
   document.body.classList.add("stats-open");
   $("#stats-close").focus();
+}
+
+function renderProjectStatsItem(item) {
+  const details = [item.status, item.funding ? `经费 ${item.funding}` : "", item.projectNumber ? `项目编号 ${item.projectNumber}` : ""].filter(Boolean);
+  return `<article class="stats-item"><h4>${escapeHtml(valueOr(item.title || item.name))}</h4><p><strong class="stats-author-position">${escapeHtml(valueOr(item.role, "参与人"))}</strong>${details.length ? `<span>${escapeHtml(details.join(" · "))}</span>` : ""}</p></article>`;
 }
 
 function closeStats() {

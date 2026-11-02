@@ -228,7 +228,24 @@
       "pdfUrl": ""
     }
   ],
-  "projects": [],
+  "projects": [
+    {
+      "id": "PROJECT-001",
+      "title": "教育厅课题-重点领域专项科研项目",
+      "projectNumber": "",
+      "role": "第二参与人",
+      "status": "在研",
+      "funding": "0.5 万元"
+    },
+    {
+      "id": "PROJECT-002",
+      "title": "教育部课题-人文社会科学研究规划基金项目",
+      "projectNumber": "",
+      "role": "第五参与人",
+      "status": "在研",
+      "funding": "10 万元"
+    }
+  ],
   "fieldTemplate": {
     "paper": {
       "id": "paper-000",
@@ -258,9 +275,10 @@
     "project": {
       "id": "research-project-000",
       "title": "",
+      "projectNumber": "",
       "role": "",
-      "period": "",
-      "summary": ""
+      "status": "",
+      "funding": ""
     }
   }
 }

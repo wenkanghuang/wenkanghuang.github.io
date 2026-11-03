@@ -244,6 +244,19 @@
       "role": "第五参与人",
       "status": "在研",
       "funding": "10 万元"
+    },
+    {
+      "id": "PROJECT-003",
+      "title": "困境与机遇：工业设计文化创意产业人才培养模式研究",
+      "projectNumber": "2025GXJK0369",
+      "role": "第七参与人",
+      "status": "在研",
+      "funding": "1 万元",
+      "category": "广东省教育科学规划项目（厅级）-高等教育专项",
+      "level": "市厅级",
+      "approvalDate": "2025-10-24",
+      "startDate": "2025-10-20",
+      "plannedEndDate": "2027-10-31"
     }
   ],
   "fieldTemplate": {
@@ -278,7 +291,12 @@
       "projectNumber": "",
       "role": "",
       "status": "",
-      "funding": ""
+      "funding": "",
+      "category": "",
+      "level": "",
+      "approvalDate": "",
+      "startDate": "",
+      "plannedEndDate": ""
     }
   }
 }

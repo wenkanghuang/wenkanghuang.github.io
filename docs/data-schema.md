@@ -34,4 +34,4 @@
 
 科研成果的 `rankings.classification` 用于记录“普刊”“南核”等不属于 JCR 或中科院分区的期刊分类。
 
-科研课题使用 `PROJECT-000` 形式的唯一 ID；`projectNumber`、`role`、`status`、`funding` 分别记录项目编号、参与排序、当前状态和经费。
+科研课题使用 `PROJECT-000` 形式的唯一 ID；`projectNumber`、`role`、`status`、`funding` 分别记录项目编号、参与排序、当前状态和经费；可选字段 `category`、`level`、`approvalDate`、`startDate`、`plannedEndDate` 记录项目类别、级别及日期。

@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20261103-1";
+const ASSET_VERSION = "20261106-1";
 const DATA_PATHS = {
   profile: `data/profile.json?v=${ASSET_VERSION}`,
   research: `data/research.json?v=${ASSET_VERSION}`,
@@ -229,22 +229,23 @@ function openPaper(id) {
   if (!paper) return;
   clearTimeout(drawerCloseTimer);
   state.lastFocus = document.activeElement;
-  const gallery = [
-    ...(paper.detailImage || paper.coverImage ? [{ src: paper.detailImage || paper.coverImage, alt: paper.detailAlt || paper.coverAlt || paper.title }] : []),
+  const figures = (paper.figures || []).length ? paper.figures : [
+    ...(paper.detailImage || paper.coverImage ? [{ src: paper.detailImage || paper.coverImage, alt: paper.detailAlt || paper.coverAlt || paper.title, caption: "" }] : []),
     ...(paper.detailImages || [])
   ];
-  const galleryMarkup = gallery.length ? `<div class="detail-gallery">${gallery.map(image => `<img class="detail-image" src="${escapeHtml(versionedAsset(image.src))}" alt="${escapeHtml(image.alt || paper.title)}" decoding="async">`).join("")}</div>` : "";
-  const detailRows = [
-    paper.statusLabel ? detailRow("当前状态", paper.statusLabel) : "",
+  const galleryMarkup = figures.length ? `<div class="detail-gallery">${figures.map(figure => `<figure class="detail-figure"><img class="detail-image" src="${escapeHtml(versionedAsset(figure.src))}" alt="${escapeHtml(figure.alt || paper.title)}" loading="lazy" decoding="async">${figure.caption ? `<figcaption>${escapeHtml(figure.caption)}</figcaption>` : ""}</figure>`).join("")}</div>` : "";
+  const primaryRows = [
     paper.publicationDate ? detailRow("发表日期", paper.publicationDate) : "",
-    paper.contributionDetail || paper.contribution ? detailRow("个人贡献", paper.contributionDetail || paper.contribution) : "",
+    paper.contributionDetail || paper.contribution ? detailRow("个人贡献", paper.contributionDetail || paper.contribution) : ""
+  ].join("");
+  const sourceRows = [
     paper.issn ? detailRow("ISSN", paper.issn) : "",
     paper.doi ? detailLinkRow("DOI", paper.doi, paper.articleUrl) : "",
     paper.articleUrl ? detailLinkRow("论文原文", "访问出版社开放获取页面 ↗", paper.articleUrl) : "",
     paper.pdfUrl ? detailLinkRow("PDF", "预览或下载 PDF ↗", paper.pdfUrl) : (paper.articleUrl ? detailRow("PDF", "暂未上传；可通过出版社原文入口访问") : "")
   ].join("");
-  $("#detail-content").innerHTML = `<p class="eyebrow">${escapeHtml(valueOr(paper.journal))}</p><h2 id="detail-title">${escapeHtml(valueOr(paper.title))}</h2>
-    ${galleryMarkup}<div class="detail-list">${detailRows}</div>`;
+  $("#detail-content").innerHTML = `<h2 id="detail-title">${escapeHtml(valueOr(paper.title))}</h2>
+    <div class="detail-list detail-list-primary">${primaryRows}</div>${galleryMarkup}<div class="detail-list detail-list-source">${sourceRows}</div>`;
   $("#drawer-backdrop").hidden = false;
   $("#detail-drawer").classList.add("is-open");
   $("#detail-drawer").setAttribute("aria-hidden", "false");

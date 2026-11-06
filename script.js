@@ -1,4 +1,4 @@
-const ASSET_VERSION = "20261106-2";
+const ASSET_VERSION = "20261106-3";
 const DATA_PATHS = {
   profile: `data/profile.json?v=${ASSET_VERSION}`,
   research: `data/research.json?v=${ASSET_VERSION}`,
